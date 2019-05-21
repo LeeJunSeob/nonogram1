@@ -56,10 +56,11 @@ public class nonogram {
         Keys keys = ev3.getKeys();
         color = new EV3ColorSensor(SensorPort.S4);
         lcd = ev3.getTextLCD();
+        stampMotor.rotate(-900);
         stampMotor.setSpeed (800);
         stampMotor.rotate (200);
         horizontalMotor.setSpeed(400);
-        makeNonogram (map7);
+        makeNonogram (map10);
     }
 
     public static void stamp()
@@ -73,14 +74,15 @@ public class nonogram {
     public static void makeNonogram(int[][] list)
     {
         horizontalMotor.setSpeed(400);
-        verticalMotor.rotate(150);
+        verticalMotor.rotate(-150);
 
         //func that move vertical until starting point
 
         //stamping that list index is 1
         for(int i = 0; i < list.length; i++)
         {
-            horizontalMotor.rotate(1000);//align left
+            horizontalMotor.rotate(1500);//align left
+            horizontalMotor.rotate(-50);
 
             for(int j = 0; j < list[i].length; j++)
             {
@@ -90,7 +92,7 @@ public class nonogram {
                     stamp();
             }
 
-            verticalMotor.rotate(65);//move vertical
+            verticalMotor.rotate(-65);//move vertical
         }
     }
     
