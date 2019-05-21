@@ -17,59 +17,83 @@ import lejos.hardware.Sound;
 import java.lang.String;
 
 public class nonogram {
-	   private static EV3ColorSensor color;
-	   static TextLCD lcd;
-	   static RegulatedMotor stampMotor = Motor.A;		// Moter A   forward:  Up stamp frame
-														//           backward: Down stamp frame
-	   static RegulatedMotor verticalMotor = Motor.B;   // Moter B   forward:  Take out sheet toward initial point
-														//           backward: Take in sheet ``
-	   static RegulatedMotor horizontalMotor = Motor.C;	// Moter C   backward:  move stamp frame toward vertical moter
-														//           forward: move stamp frame counterwise
-	   static int[][] map = {{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1},{1,1,1,1,1}};
-	   static int[][] map7 = {{1,1,1,1,1,1,1},{1,1,1,1,1,1,1},{1,1,1,1,1,1,1},{1,1,1,1,1,1,1},{1,1,1,1,1,1,1},{1,1,1,1,1,1,1},{1,1,1,1,1,1,1}};
+    private static EV3ColorSensor color;
+    static TextLCD lcd;
+    static RegulatedMotor stampMotor = Motor.A;		  // Moter A   forward:  Up stamp frame
+                                                        //           backward: Down stamp frame
+    static RegulatedMotor verticalMotor = Motor.B;      // Moter B   forward:  Take out sheet toward initial point
+                                                        //           backward: Take in sheet ``
+    static RegulatedMotor horizontalMotor = Motor.C;	  // Moter C   backward:  move stamp frame toward vertical moter
+                                                        //           forward: move stamp frame counterwise
+    static int[][] map = {{0,1,1,0,1},
+                          {1,1,0,0,0},
+                          {0,0,0,1,0},
+                          {1,0,1,0,1},
+                          {0,1,0,1,0}};
 
-	  	public static void main (String[] args)
-	  	{
-	        EV3 ev3 = (EV3) BrickFinder.getLocal();
-	        Keys keys = ev3.getKeys();
-	        color = new EV3ColorSensor(SensorPort.S4);
-	        lcd = ev3.getTextLCD();
+    static int[][] map7 = {{1,1,1,1,1,1,1},
+                           {1,1,1,1,1,1,1},
+                           {1,1,1,1,1,1,1},
+                           {1,1,1,1,1,1,1},
+                           {1,1,1,1,1,1,1},
+                           {1,1,1,1,1,1,1},
+                           {1,1,1,1,1,1,1}};
 
-	        stampMotor.setSpeed(800);
-	        stampMotor.rotate(200);
-	        horizontalMotor.setSpeed(400);
-	        makeNonogram(map7);
+    static int[][] map10 = {{1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1},
+                            {1,1,1,1,1,1,1,1,1,1}};
 
-	  	}
-	  	
-	  	
-	  	public static void stamp()
-	  	{
-	  		stampMotor.setSpeed(800);
-	  		stampMotor.rotate (+200);
-	        stampMotor.rotate(-400);
-	        stampMotor.rotate(200);
-	  	}
-			
-	  	public static void makeNonogram(int[][] list)
-	  	{
-	  		horizontalMotor.setSpeed(400);
-	  		verticalMotor.rotate(150);
-	  		
-	  		//func that move vertical until starting point
-	  		//stamping that list index is 1
-	  		for(int i=0;i<7;i++){
-		  		horizontalMotor.rotate(1000);//align left
-		  		for(int j=0;j<7;j++){
-		  			horizontalMotor.rotate(-100);//move horizontal
-		  			if(list[i][j]==1){
-		  				stamp();
-		  			}
-		  		}
-		  		verticalMotor.rotate(100);//move vertical
-	  		}
-	  	}
-	  	
+    public static void main (String[] args)
+    {
+        EV3 ev3 = (EV3) BrickFinder.getLocal();
+        Keys keys = ev3.getKeys();
+        color = new EV3ColorSensor(SensorPort.S4);
+        lcd = ev3.getTextLCD();
+        stampMotor.setSpeed (800);
+        stampMotor.rotate (200);
+        horizontalMotor.setSpeed(400);
+        makeNonogram (map7);
+    }
+
+    public static void stamp()
+    {
+        stampMotor.setSpeed (800);
+        stampMotor.rotate (200);
+        stampMotor.rotate (-400);
+        stampMotor.rotate (200);
+    }
+
+    public static void makeNonogram(int[][] list)
+    {
+        horizontalMotor.setSpeed(400);
+        verticalMotor.rotate(150);
+
+        //func that move vertical until starting point
+
+        //stamping that list index is 1
+        for(int i = 0; i < list.length; i++)
+        {
+            horizontalMotor.rotate(1000);//align left
+
+            for(int j = 0; j < list[i].length; j++)
+            {
+                horizontalMotor.rotate(-100);//move horizontal
+
+                if(list[i][j]==1)
+                    stamp();
+            }
+
+            verticalMotor.rotate(65);//move vertical
+        }
+    }
+    
 //	  	public static void initialize ()
 //	    {
 //	      stampMoter.setSpeed(100); 	  		        	// * ARGUMENT MUST BE TESTED *
@@ -97,7 +121,7 @@ public class nonogram {
 //	      Thread.sleep (1000);
 //	    }
 
-	   
+ 
 
 
 }
