@@ -54,21 +54,19 @@ public class nonogram {
     {
         EV3 ev3 = (EV3) BrickFinder.getLocal();
         Keys keys = ev3.getKeys();
-        color = new EV3ColorSensor(SensorPort.S4);
+//        color = new EV3ColorSensor(SensorPort.S4);
         lcd = ev3.getTextLCD();
-        stampMotor.rotate(-900);
-        stampMotor.setSpeed (800);
-        stampMotor.rotate (200);
+        stampMotor.setSpeed(20);
+        stampMotor.rotate(50);
+        stampMotor.rotate(-8);
         horizontalMotor.setSpeed(400);
         makeNonogram (map10);
     }
 
     public static void stamp()
     {
-        stampMotor.setSpeed (800);
-        stampMotor.rotate (200);
-        stampMotor.rotate (-400);
-        stampMotor.rotate (200);
+        stampMotor.rotate (8);
+        stampMotor.rotate (-8);
     }
 
     public static void makeNonogram(int[][] list)
@@ -81,7 +79,7 @@ public class nonogram {
         //stamping that list index is 1
         for(int i = 0; i < list.length; i++)
         {
-            horizontalMotor.rotate(1500);//align left
+            horizontalMotor.rotate(1200);//align left
             horizontalMotor.rotate(-50);
 
             for(int j = 0; j < list[i].length; j++)
