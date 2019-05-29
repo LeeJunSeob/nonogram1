@@ -47,6 +47,22 @@ public class nonogram {
                             {0,0,0,1,1,1,1,0,0,0},
                             {1,1,1,1,1,1,1,1,1,1},
                             {0,1,1,1,1,1,1,1,1,0}};
+    
+    static int[][] map15 = {{0,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+					        {1,1,1,0,1,1,1,1,1,1,1,0,1,1,1},
+					        {1,1,0,0,0,1,1,1,1,1,0,0,0,1,1},
+					        {1,1,0,0,0,0,1,1,1,0,0,0,0,1,1},
+					        {1,1,0,0,0,0,1,1,1,0,0,0,0,1,1},
+					        {0,1,1,0,0,0,0,1,0,0,0,0,1,1,0},
+					        {0,0,1,1,0,0,0,0,0,0,0,1,1,0,0},
+					        {0,0,0,1,1,0,0,0,0,0,1,1,0,0,0},
+					        {0,0,0,0,1,1,0,0,0,1,1,0,0,0,0},
+					        {0,0,0,0,1,1,1,0,1,1,1,0,0,0,0},
+					        {0,0,0,0,0,1,1,1,1,1,0,0,0,0,0},
+					        {0,0,0,0,0,0,1,1,1,0,0,0,0,0,0},
+					        {0,0,0,0,1,1,1,1,1,1,1,0,0,0,0},
+					        {0,0,1,1,1,1,1,1,1,1,1,1,1,0,0},
+					        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
 
     public static void main (String[] args)
     {
@@ -55,7 +71,7 @@ public class nonogram {
 //        color = new EV3ColorSensor(SensorPort.S4);
         lcd = ev3.getTextLCD();
         
-        int[][] usemap = map10;
+        int[][] usemap = map15;
         
         /*
         for (int i = 0; i < usemap.length; i++)
@@ -73,22 +89,27 @@ public class nonogram {
 		verticalMotor.setSpeed(100);
 		horizontalMotor.setSpeed(400);
 
-        //stampMotor.rotate(-10);
+        stampMotor.rotate(-10);
         
-        verticalMotor.rotate(-200);
+        verticalMotor.rotate(-770);
 	}
 	
 	public static void end ()
 	{
-		horizontalMotor.rotate (-1200);
+		horizontalMotor.rotate (-1000);
 		horizontalMotor.rotate (600);
 	}
 	
-    public static void stamp() throws InterruptedException
+    public static void stamp()
     {
-        stampMotor.rotate (15);
-        Thread.sleep(300);
-        stampMotor.rotate (-15);
+        stampMotor.rotate (10);
+//        try {
+//			Thread.sleep(300);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+        stampMotor.rotate (-10);
     }
     
     /* func that move vertical until starting point */
@@ -97,21 +118,21 @@ public class nonogram {
         for(int i = 0; i < list.length; i++)
         {
             horizontalMotor.rotate(1200);//align left
-            horizontalMotor.rotate(-140);
+//            horizontalMotor.rotate(-30);
             
-            int prev = 0;
-            for(int j = list[i].length; j >= 0; j--)
+            int prev = list[i].length - 1;
+            for(int j = list[i].length - 1; j >= 0; j--)
             {
 
                 if(list[i][j] == 1)
                 {
-                	horizontalMotor.rotate(-66 * (j - prev));
+                	horizontalMotor.rotate(-68 * (prev - j));
                     stamp();
                     prev = j;
                 }
             }
 
-            verticalMotor.rotate(-43);//move vertical
+            verticalMotor.rotate(-46);//move vertical
         }
     }
     
