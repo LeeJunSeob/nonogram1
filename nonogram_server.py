@@ -11,66 +11,6 @@ client = -1
 clientInfo = -1
 dataset = []
 
-def make_data (file_name):
-    f = open(file_name, 'r')
-
-
-    struct = []
-    struct.append(int(f.readline()[:-1]))
-    while True:
-        x = []
-        y = []
-
-        for i in range (struct[0]):
-            x.append(f.readline())
-        for j in range (struct[0]):
-            y.append(f.readline())
-
-        struct.append (x)
-        struct.append (y)
-
-        f.readline();
-
-        dataset.append (struct[:])
-
-        struct = []
-        tmp = f.readline()[:-1]
-        if (len(tmp) == 0):
-            break
-
-        struct.append(int(tmp))
-
-    f.close()
-
-
-def connect_close ():
-    print ("Socket closed in initial point.");
-    client.close()
-    sock.close()
-    sleep(1)
-
-
-def connect_client ():
-    print ("Waiting to connect...");
-
-    try:
-        client, clientInfo = sock.accept ()
-        print ("Socket connected:", clientInfo);
-        sleep(1)
-        return True
-    except:
-        connect_close ()
-        return False
-
-
-def send_data (msg):
-    sendmsg = b'\x00'
-    sendmsg += chr(len(msg)).encode('utf-8')
-    snedmsg += msg.encode('utf-8')
-    client.send (msg)
-    return True
-
-
 def gen_row(w, s):
     """Create all patterns of a row or col that match given runs."""
     def gen_seg(o, sp):
@@ -184,8 +124,75 @@ def show_gram(m):
     return tmp
 
 
+def make_data (file_name):
+    f = open(file_name, 'r')
+
+
+    struct = []
+    struct.append(int(f.readline()[:-1]))
+    while True:
+        x = []
+        y = []
+
+        for i in range (struct[0]):
+            x.append(f.readline())
+        for j in range (struct[0]):
+            y.append(f.readline())
+
+        struct.append (x)
+        struct.append (y)
+
+        f.readline();
+
+        dataset.append (struct[:])
+
+        struct = []
+        tmp = f.readline()[:-1]
+        if (len(tmp) == 0):
+            break
+
+        struct.append(int(tmp))
+
+    f.close()
+
+
+def connect_close ():
+    print ("Socket closed in initial point.");
+    client.close()
+    sock.close()
+    sleep(1)
+
+
+def connect_client ():
+    print ("Waiting to connect...");
+
+    try:
+        client, clientInfo = sock.accept ()
+        print ("Socket connected:", clientInfo);
+        sleep(1)
+        return True
+    except:
+        connect_close ()
+        return False
+
+
+def send_data (msg):
+    sendmsg = b'\x00'
+    sendmsg += chr(len(msg)).encode('utf-8')
+    snedmsg += msg.encode('utf-8')
+    client.send (msg)
+    return True
+
+
+def recv_data (size):
+    msg = client.recv (len(str(size) + "EV3 Got Data: "))
+    print msg
+    return True
+
+
 def main ():
-    """
+    make_data(data_file_name)
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((server_address, port))
     sock.listen(1)
@@ -194,9 +201,14 @@ def main ():
 
     while connect_client ():
         try:
-            while True:
-                
+            send_data(str(dataset[0]))
+            if (recv_data(len(str(dataset[0])))):
+                solved = solver (dataset[1])
+                solved = show_gram (solved)
 
+                for i in range(len(solved)):
+                    print "SEND"+str(i)+": ", solved[i]
+                    send_data (solved[i])
                 else:
                     print("Disconnected")
                     client.close()
@@ -206,13 +218,7 @@ def main ():
             print("Closing socket")
             client.close()
             sock.close()
-    """
-    make_data(data_file_name)
-    solved = solver (dataset[1])
-    solved = show_gram (solved)
 
-    for i in range(len(solved)):
-        print "SEND"+str(i)+": ", solved[i]
 
 main ()
 
