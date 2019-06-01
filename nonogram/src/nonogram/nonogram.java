@@ -32,12 +32,14 @@ public class nonogram {
     static RegulatedMotor horizontalMotor = Motor.C;	// Moter C   backward:  move stamp frame toward vertical moter
                                                         //           forward: move stamp frame counterwise
 
-    String serverAddress = "10.0.1.11";
-    int serverPort = 8060;
+    static String serverAddress = "10.0.1.11";
+    static int serverPort = 8060;
 
-    Socket socket = null;
-    DataOutputStream streamOut = null;
-    DataInputStream streamIn = null;
+    static Socket socket = null;
+    static DataOutputStream streamOut = null;
+    static DataInputStream streamIn = null;
+    
+    static int size = -1;
 
     static int[][] map5 = {{1,1,1,1,1},
                           {1,1,1,1,1},
@@ -64,23 +66,23 @@ public class nonogram {
                             {1,1,1,1,1,1,1,1,1,1},
                             {0,1,1,1,1,1,1,1,1,0}};
 
-    static int[][] map15 = {{0,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
-					        {1,1,1,0,1,1,1,1,1,1,1,0,1,1,1},
-					        {1,1,0,0,0,1,1,1,1,1,0,0,0,1,1},
-					        {1,1,0,0,0,0,1,1,1,0,0,0,0,1,1},
-					        {1,1,0,0,0,0,1,1,1,0,0,0,0,1,1},
-					        {0,1,1,0,0,0,0,1,0,0,0,0,1,1,0},
-					        {0,0,1,1,0,0,0,0,0,0,0,1,1,0,0},
-					        {0,0,0,1,1,0,0,0,0,0,1,1,0,0,0},
-					        {0,0,0,0,1,1,0,0,0,1,1,0,0,0,0},
-					        {0,0,0,0,1,1,1,0,1,1,1,0,0,0,0},
-					        {0,0,0,0,0,1,1,1,1,1,0,0,0,0,0},
-					        {0,0,0,0,0,0,1,1,1,0,0,0,0,0,0},
-					        {0,0,0,0,1,1,1,1,1,1,1,0,0,0,0},
-					        {0,0,1,1,1,1,1,1,1,1,1,1,1,0,0},
-					        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
+    static int[][] map15 = {{0,0,0,0,1,1,1,1,1,0,1,1,0,0,0},
+					        {0,0,0,1,1,1,1,1,0,1,1,1,0,1,0},
+					        {0,0,1,1,1,0,0,0,1,1,1,1,0,1,0},
+					        {0,1,1,1,0,0,0,1,1,1,1,1,0,1,1},
+					        {0,1,1,0,0,0,0,1,1,0,1,1,0,1,1},
+					        {1,1,1,0,0,0,1,1,1,0,1,1,0,1,1},
+					        {1,1,0,0,0,0,1,1,0,0,1,1,0,0,1},
+					        {1,1,0,0,0,1,1,1,0,0,0,1,0,0,1},
+					        {1,1,0,0,0,1,1,1,1,1,1,0,0,1,1},
+					        {1,1,1,0,1,1,1,1,1,1,1,1,0,1,1},
+					        {0,1,1,0,1,1,0,0,0,0,1,0,0,1,1},
+					        {0,1,1,1,1,1,0,0,0,0,0,1,1,1,0},
+					        {0,0,1,1,1,0,0,0,0,0,1,1,1,0,0},
+					        {0,0,1,1,1,1,1,1,1,1,1,1,0,0,0},
+					        {0,0,0,0,1,1,1,1,1,1,1,0,0,0,0}};
 
-    public static void main (String[] args)
+    public static void main (String[] args) throws InterruptedException
     {
         EV3 ev3 = (EV3) BrickFinder.getLocal();
         Keys keys = ev3.getKeys();
@@ -88,6 +90,7 @@ public class nonogram {
         lcd = ev3.getTextLCD();
 
         int[][] usemap = get_data (true);
+        size = usemap[0].length;
 
         /*
         for (int i = 0; i < usemap.length; i++)
@@ -95,14 +98,14 @@ public class nonogram {
         		usemap[i][j] = (i + j) % 2;
         */
         initialize ();
-        makeNonogram (usemap, usemap.length);
+        makeNonogram (usemap, size);
         end ();
     }
 
     public static int[][] get_data (boolean test)
     {
         if (test)
-            return map10;
+            return map15;
 
         try {
             lcd.clear();
@@ -113,28 +116,33 @@ public class nonogram {
             lcd.drawString ("Connected", 1, 1);
 
             streamIn = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-		streamOut = new DataOutputStream(socket.getOutputStream());
+            streamOut = new DataOutputStream(socket.getOutputStream());
         }
         catch (UnknownHostException uhe) {
-	      lcd.drawString("Host unknown: "+uhe.getMessage(), 1, 1);
-	  }
+            lcd.clear();
+        	lcd.drawString("Host unknown: "+uhe.getMessage(), 1, 1);
+        } catch (IOException ioe) {
+            lcd.clear();
+        	lcd.drawString("ioe:", 1, 1);
+		}
 
         String sendM = "";	//Send data
         String recvM = "";	//receive data
-        map = new int[20][20];
+        int map[][] = new int[20][20];
         boolean flag = true;
 
         try {
             recvM = streamIn.readUTF();
-            sendM = "EV3 Got Data: " + recvM
+            sendM = "EV3 Got Data: " + recvM;
             streamOut.writeUTF(sendM);
             streamOut.flush();
 
             lcd.clear();
             lcd.drawString ("Connected", 1, 1);
+            
+            size = Integer.parseInt(recvM);
 
-            int size = Integer.parseInt(recvM);
-
+            lcd.clear();
             for (int i = 0; i < size; i++)
             {
                 recvM = streamIn.readUTF();
@@ -147,12 +155,13 @@ public class nonogram {
                     else
                         map[i][j] = -1;
                 }
+                lcd.drawString (recvM, 1, i*2);                
             }
             flag = false;
         }
         catch (IOException ioe) {
             lcd.clear();
-            lcd.drawString ("SE:\n", ioe.getmessage(), 4, 4);
+            lcd.drawString ("SE:\n", 4, 4);
         }
         return map;
     }
@@ -160,13 +169,12 @@ public class nonogram {
 
     public static void initialize ()
     {
-	  stampMotor.setSpeed(25);
-	  verticalMotor.setSpeed(100);
-	  horizontalMotor.setSpeed(400);
-
-        stampMotor.rotate(-10);
-
-        verticalMotor.rotate(-770);
+        stampMotor.setSpeed(25);
+        verticalMotor.setSpeed(100);
+        horizontalMotor.setSpeed(400);
+        
+        stampMotor.rotate (40);
+        verticalMotor.rotate(-740);
 	}
 
 	public static void end ()
@@ -175,35 +183,31 @@ public class nonogram {
 		horizontalMotor.rotate (600);
 	}
 
-    public static void stamp()
+    public static void stamp() throws InterruptedException
     {
-        stampMotor.rotate (10);
-//        try {
-//			Thread.sleep(300);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-        stampMotor.rotate (-10);
+        stampMotor.rotate (6);
+        Thread.sleep(300);
+        stampMotor.rotate (-6);
     }
 
     /* func that move vertical until starting point */
-    public static void makeNonogram(int[][] list, int size)
+    public static void makeNonogram(int[][] list, int size) throws InterruptedException
     {
         lcd.clear();
-        lcd.drawString ("Make size: " + Integer.toString(size), 1, 1);
+//      lcd.drawString ("Make size: " + Integer.toString(size), 1, 1);
         for(int i = 0; i < size; i++)
         {
-            horizontalMotor.rotate(1200);//align left
+            horizontalMotor.rotate(-1200);//align left
+            horizontalMotor.rotate(100);
 //            horizontalMotor.rotate(-30);
 
-            int prev = list[i].length - 1;
-            for(int j = list[i].length - 1; j >= 0; j--)
+            int prev = 0;
+            for(int j = 0; j < size; j++)
             {
 
                 if(list[i][j] == 1)
                 {
-                	horizontalMotor.rotate(-68 * (prev - j));
+                	horizontalMotor.rotate(+65 * (j - prev));
                     stamp();
                     prev = j;
                 }

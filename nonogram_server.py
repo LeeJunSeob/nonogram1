@@ -3,12 +3,10 @@
 import socket
 from itertools import izip
 
-server_address = "10.0.1.10"
-port = 8040
+server_address = "10.0.1.11"
+port = 8060
 data_file_name = "datas"
 
-client = -1
-clientInfo = -1
 dataset = []
 
 def gen_row(w, s):
@@ -163,29 +161,25 @@ def connect_close ():
     sleep(1)
 
 
-def connect_client ():
+def connect_client (sock):
     print ("Waiting to connect...");
 
-    try:
-        client, clientInfo = sock.accept ()
-        print ("Socket connected:", clientInfo);
-        sleep(1)
-        return True
-    except:
-        connect_close ()
-        return False
+    client, clientInfo = sock.accept ()
+    print ("Socket connected:", clientInfo);
+    return (True, client)
 
 
-def send_data (msg):
+def send_data (client, msg):
     sendmsg = b'\x00'
     sendmsg += chr(len(msg)).encode('utf-8')
-    snedmsg += msg.encode('utf-8')
-    client.send (msg)
+    sendmsg += msg.encode('utf-8')
+    print("Send Data : " + sendmsg.decode('utf-8'))
+    client.send (sendmsg)
     return True
 
 
-def recv_data (size):
-    msg = client.recv (len(str(size) + "EV3 Got Data: "))
+def recv_data (client, size):
+    msg = client.recv (1024)
     print msg
     return True
 
@@ -197,27 +191,32 @@ def main ():
     sock.bind((server_address, port))
     sock.listen(1)
 
-    connect_client ()
+    b, client = connect_client (sock)
 
-    while connect_client ():
-        try:
-            send_data(str(dataset[0]))
-            if (recv_data(len(str(dataset[0])))):
-                solved = solver (dataset[1])
-                solved = show_gram (solved)
+    print (dataset[0])
+    datause = dataset[0]
 
-                for i in range(len(solved)):
-                    print "SEND"+str(i)+": ", solved[i]
-                    send_data (solved[i])
-                else:
-                    print("Disconnected")
-                    client.close()
-                    sock.close()
-                    break
-        except:
-            print("Closing socket")
-            client.close()
-            sock.close()
+    try: 
+        send_data(client, str(datause[0]))
+        print('send end')
+        if (recv_data(client, len(str(datause[0])))):
+            print('recv end')
+            solved = solver (datause)
+            solved = show_gram (solved)
+
+            for i in range(len(solved)):
+                print "SEND"+str(i)+": ", solved[i]
+                send_data (client, solved[i])
+    except:
+        print("ERROR")
+        client.close()
+        sock.close()
+        return
+
+    client.close()
+    sock.close()
+
+    
 
 
 main ()
